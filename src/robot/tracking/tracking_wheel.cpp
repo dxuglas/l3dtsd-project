@@ -9,7 +9,7 @@ TrackingWheel::TrackingWheel(pros::Rotation* encoder, float diameter, double off
     last_total(get_distance_total()) {}
 
 double TrackingWheel::get_distance_total() {
-    return encoder->get_angle() / 360.0f * M_PI * diameter;
+    return (encoder->get_position() - zero_position) / 36000.0f * M_PI * diameter;
 }
 
 double TrackingWheel::get_distance_delta() {
@@ -24,5 +24,7 @@ double TrackingWheel::get_offset() {
 }
 
 void TrackingWheel::tare() {
-    encoder->reset();
+    encoder->reset_position();
+    zero_position = encoder->get_position();
+    last_total = get_distance_total();
 }

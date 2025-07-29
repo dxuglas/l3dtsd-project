@@ -30,6 +30,7 @@ class TrackingWheel {
         
     private:
         pros::Rotation* encoder;
+        float zero_position;
         float diameter;
         float offset;
         float last_total;

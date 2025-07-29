@@ -19,10 +19,13 @@ TrackingWheel v_wheel(&v_rotation, 2.0, 1);
 
 pros::IMU left_imu(11);
 
-pros::Motor indexer(8);
-pros::Motor ccw_rollers(4);
-pros::Motor cw_rollers(9);
+pros::Motor indexer(10);
+pros::Motor front_rollers(4);
+pros::Motor top_rollers(8);
 
 pros::adi::Pneumatics match_load_ramp('A', false);
 
 pros::Controller master(pros::E_CONTROLLER_MASTER);
+
+pros::adi::DigitalOut indexer_led_left('B');
+pros::adi::DigitalOut indexer_led_right('C');

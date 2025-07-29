@@ -30,7 +30,7 @@ class Odometry {
          * @param q expected proccess nosie
          */
         void configure(std::vector<pros::IMU*> imus, std::vector<TrackingWheel*> v_wheels, std::vector<TrackingWheel*> h_wheels,
-            double p_x, double p_y, double p_theta, double r_translation, double r_heading, double q);
+            double p_theta, double r_heading, double q);
         /**
          * @brief Update the estimated pose of the robot
          * 
@@ -47,10 +47,7 @@ class Odometry {
         std::vector<TrackingWheel*> v_wheels;
         std::vector<TrackingWheel*> h_wheels;
 
-        double p_x;
-        double p_y;
         double p_theta;
-        double r_translation;
         double r_heading;
         double q;
 };

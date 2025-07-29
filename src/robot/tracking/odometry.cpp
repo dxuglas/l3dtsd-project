@@ -139,37 +139,25 @@ struct Delta2D {
  * 
  * @return Delta2D predicted (dx,dy) of robot
  */
-static Delta2D kalman_fuse_translation (
+static Delta2D compute_translation(
     const std::vector<TrackingWheelData>& h_wheels, 
     const std::vector<TrackingWheelData>& v_wheels, 
-    double d_theta, double& p_x, double& p_y, double r, double q) 
+    double d_theta) 
 {
     double dy_sum = 0, dx_sum = 0;
-    int dy_count = 0, dx_count = 0;
 
     for (const auto& wheel : h_wheels) {
-        // if the heading is 0, assume a linear path, otherwise calculate arc
-        double dy = (std::abs(d_theta) < 1e-8) ? wheel.distance : 2 * std::sin(d_theta / 2) * ((wheel.distance / d_theta) + wheel.offset);
-        // calculate kalman gain
-        double k = p_y / (p_y + r);
-        // add weighted dy to total
-        dy_sum += k * dy;
-        dy_count++;
-        // update uncertainty of y-translation
-        p_y = (1 - k) * p_y + q;
+        double dy = (std::abs(d_theta) < 1e-8) ? wheel.distance
+                  : 2 * std::sin(d_theta / 2) * ((wheel.distance / d_theta) + wheel.offset);
+        dy_sum += dy;
     }
     for (const auto& wheel : v_wheels) {
-        // same as above but for x-translation
-        double dx = (std::abs(d_theta) < 1e-8) ? wheel.distance : 2 * std::sin(d_theta / 2) * ((wheel.distance / d_theta) + wheel.offset);
-        double k = p_x / (p_x + r);
-        dx_sum += k * dx;
-        dx_count++;
-        p_x = (1 - k) * p_x + q;
+        double dx = (std::abs(d_theta) < 1e-8) ? wheel.distance
+                  : 2 * std::sin(d_theta / 2) * ((wheel.distance / d_theta) + wheel.offset);
+        dx_sum += dx;
     }
-
-    // prevent 0 division error
-    double dx = dx_count ? (dx_sum / dx_count) : 0;
-    double dy = dy_count ? (dy_sum / dy_count) : 0;
+    double dx = v_wheels.size() ? (dx_sum / v_wheels.size()) : 0;
+    double dy = h_wheels.size() ? (dy_sum / h_wheels.size()) : 0;
     return {dx, dy};
 }
 
@@ -212,16 +200,12 @@ void Odometry::configure(
     std::vector<pros::IMU*> imus, 
     std::vector<TrackingWheel*> v_wheels,
     std::vector<TrackingWheel*> h_wheels,
-    double p_x, double p_y, double p_theta,
-    double r_translation, double r_heading, double q) 
+    double p_theta, double r_heading, double q) 
 {
     this->imus = imus;
     this->v_wheels = v_wheels;
     this->h_wheels = h_wheels;
-    this->p_x = p_x;
-    this->p_y = p_y;
     this->p_theta = p_theta;
-    this->r_translation = r_translation;
     this->r_heading = r_heading;
     this->q = q;
 }
@@ -256,7 +240,7 @@ void Odometry::update(Pose& pose, uint32_t delay) {
 
         // calculate the robots local change in position
         double d_theta = wrap_angle(heading.value() - pose.heading);
-        auto d_translation = kalman_fuse_translation(h_wheel_data, v_wheel_data, d_theta, p_x, p_y, r_translation, q);
+        auto d_translation = compute_translation(h_wheel_data, v_wheel_data, d_theta);
 
         // convert local change in position to global scope
         update_global_pose(pose, d_translation, heading.value());
@@ -268,3 +252,4 @@ void Odometry::update(Pose& pose, uint32_t delay) {
         p_time = dummy_p_time;
     }
 }
+
