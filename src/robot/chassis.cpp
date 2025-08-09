@@ -35,15 +35,19 @@ void Chassis::configure_odometry(
         std::vector<TrackingWheel*> h_wheels,
         std::vector<TrackingWheel*> v_wheels,
         std::vector<pros::IMU*> imus, 
-        double p_x, double p_y, double p_theta, 
-        double r_translation, double r_heading, double q
+        double p_theta, double r_heading, double q
     )
 {
-    odometry.configure(imus, v_wheels, h_wheels, p_x, p_y, p_theta, r_translation, r_heading, q);
+    odometry.configure(imus, v_wheels, h_wheels, p_theta, r_heading, q);
 }
-
+ 
 void Chassis::start_odometry(uint32_t delay) {
     if (odometry_task == std::nullopt) {
         odometry_task = pros::Task([delay, this] { odometry.update(pose, delay);});
     }
+}
+
+void Chassis::move(int voltage) {
+    l_motors.move(voltage);
+    r_motors.move(voltage);
 }

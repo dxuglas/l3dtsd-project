@@ -22,10 +22,7 @@ class Odometry {
          * @param imus vector of IMU pointers
          * @param v_wheels vector of vertical tracking wheels
          * @param h_wheels vector of horizontal tracking wheels
-         * @param p_x uncertainty of x-translation data
-         * @param p_y uncertainty of y-translation data
          * @param p_theta uncertainty of heading data
-         * @param r_translation expected noise of translation data
          * @param r_heading expected noise of heading data
          * @param q expected proccess nosie
          */

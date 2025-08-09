@@ -28,10 +28,11 @@ public:
         std::vector<TrackingWheel*> h_wheels,
         std::vector<TrackingWheel*> v_wheels,
         std::vector<pros::IMU*> imus, 
-        double p_x = 1000.0, double p_y = 1000.0, double p_theta = 0.1, 
-        double r_translation = 1e-4, double r_heading = 1e-4, double q = 1e-5
+        double p_theta = 0.1, double r_heading = 1e-4, double q = 1e-5
     );
     void start_odometry(uint32_t delay = 10); 
+    
+    void move(int voltage);
 
 private:
     // Devices

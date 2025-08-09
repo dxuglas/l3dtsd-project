@@ -1,5 +1,6 @@
 #include "odometry.h"
 #include "pros/imu.hpp"
+#include "pros/rtos.hpp"
 #include "tracking_wheel.h"
 #include "utils/angle.h"
 #include "utils/pose.h"
@@ -252,4 +253,3 @@ void Odometry::update(Pose& pose, uint32_t delay) {
         p_time = dummy_p_time;
     }
 }
-
