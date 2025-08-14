@@ -55,7 +55,7 @@ static std::optional<double> calculate_wheel_heading(const std::vector<TrackingW
     // check the wheels have difference in offset to prevent zero division
     if (std::abs(o_1-o_2) < 1e-8) return std::nullopt; 
     // calculate heading using arc length formula
-    return (d_1 - d_2) / (o_1 - o_2);
+    return (d_1 - d_2) / -(std::abs(o_1) + std::abs(o_2));
 }
 
 /**
@@ -72,7 +72,7 @@ static std::optional<double> fuse_imus(const std::vector<pros::IMU*>& sensors) {
     // calculate circular mean of IMU headings
     double sum_sin = 0, sum_cos = 0;
     for (auto* sensor : sensors) {
-        double heading = to_radians(sensor->get_heading());
+        double heading = to_radians(-sensor->get_heading());
         sum_sin += std::sin(heading);
         sum_cos += std::cos(heading);
     }
@@ -94,7 +94,8 @@ static std::optional<double> fuse_imus(const std::vector<pros::IMU*>& sensors) {
  * @return std::nullopt not enough data to predict heading
  * @return std::optional<double> predicted heading of the robot
  */
-static std::optional<double> kalman_fuse_theta(std::vector<pros::IMU*>& imus, std::vector<TrackingWheelData>& wheel_data, double& p, double r, double q) {
+static std::optional<double> kalman_fuse_theta(std::vector<pros::IMU*>& imus, 
+    std::vector<TrackingWheelData>& wheel_data, double& p, double r, double q) {
     auto imu_heading = fuse_imus(imus);
     auto wheel_heading = calculate_wheel_heading(wheel_data);
 
@@ -233,11 +234,8 @@ void Odometry::update(Pose& pose, uint32_t delay) {
         auto v_wheel_data = get_wheel_data(v_wheels);
         auto heading = kalman_fuse_theta(imus, h_wheel_data, p_theta, r_heading, q);
 
-        // !TODO
-        if (!heading) {
-            // handle error (log or break the loop)
-            break;
-        }
+        // supress updates if no heading is calculated (system is lost)
+        if (!heading) break;
 
         // calculate the robots local change in position
         double d_theta = wrap_angle(heading.value() - pose.heading);

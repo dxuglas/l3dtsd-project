@@ -14,6 +14,7 @@ void initialize() {
     right_h_wheel.tare();
     left_imu.tare_heading();
     while (left_imu.is_calibrating()) pros::delay(10);
+    pros::delay(2000);
     pros::Task([&] {
     while (true) {
         auto p = chassis.get_pose();
